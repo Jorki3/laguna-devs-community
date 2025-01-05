@@ -16,15 +16,20 @@ import * as z from "zod";
 const formSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
 });
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -38,17 +43,20 @@ const Login = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
       });
 
       if (error) {
-        toast.error("Error al iniciar sesión");
-        console.error("Error de autenticación:", error);
+        toast.error("Error al registrar usuario");
+        console.error("Error de registro:", error);
+      } else {
+        toast.success("Usuario registrado exitosamente");
+        navigate("/login");
       }
     } catch (error) {
-      toast.error("Error al iniciar sesión");
+      toast.error("Error al registrar usuario");
       console.error("Error inesperado:", error);
     }
   };
@@ -59,8 +67,8 @@ const Login = () => {
       <div className="flex items-center justify-center p-4 pt-32">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="font-display text-2xl">Bienvenido de nuevo</CardTitle>
-            <CardDescription>Inicia sesión para acceder a tu cuenta</CardDescription>
+            <CardTitle className="font-display text-2xl">Crear cuenta</CardTitle>
+            <CardDescription>Regístrate para acceder a la plataforma</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -91,13 +99,26 @@ const Login = () => {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirmar contraseña</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full">
-                  Iniciar sesión
+                  Registrarse
                 </Button>
                 <p className="text-center text-sm text-gray-600">
-                  ¿No tienes una cuenta?{" "}
-                  <Link to="/register" className="text-primary hover:underline">
-                    Regístrate
+                  ¿Ya tienes una cuenta?{" "}
+                  <Link to="/login" className="text-primary hover:underline">
+                    Inicia sesión
                   </Link>
                 </p>
               </form>
@@ -109,4 +130,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
