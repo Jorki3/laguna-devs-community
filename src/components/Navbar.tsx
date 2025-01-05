@@ -11,15 +11,15 @@ export const Navbar = () => {
         </Link>
         <div className="flex items-center space-x-4">
           <Link to="/events" className="text-sm font-medium hover:text-primary">
-            Events
+            Eventos
           </Link>
           <Link to="/community" className="text-sm font-medium hover:text-primary">
-            Community
+            Comunidad
           </Link>
           <Link to="/login">
             <Button variant="secondary" size="sm" className="flex items-center space-x-2">
               <Github className="w-4 h-4" />
-              <span>Login</span>
+              <span>Iniciar Sesión</span>
             </Button>
           </Link>
         </div>
