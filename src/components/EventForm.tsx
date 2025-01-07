@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
 interface EventFormProps {
@@ -29,6 +36,15 @@ interface EventFormValues {
   price: number;
   tickets_available: number;
 }
+
+const statusOptions = [
+  { value: "draft", label: "Borrador" },
+  { value: "upcoming", label: "Próximamente" },
+  { value: "in_progress", label: "En curso" },
+  { value: "finished", label: "Finalizado" },
+  { value: "postponed", label: "Pospuesto" },
+  { value: "cancelled", label: "Cancelado" },
+];
 
 export const EventForm = ({ eventId, defaultValues }: EventFormProps) => {
   const { toast } = useToast();
@@ -158,9 +174,20 @@ export const EventForm = ({ eventId, defaultValues }: EventFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Estado</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un estado" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
