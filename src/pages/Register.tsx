@@ -1,22 +1,20 @@
-import { Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Navbar } from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useEffect } from "react";
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const formSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-  confirmPassword: z.string(),
+  confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -24,6 +22,8 @@ const formSchema = z.object({
 
 const Register = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,16 +33,9 @@ const Register = () => {
     },
   });
 
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -58,6 +51,8 @@ const Register = () => {
     } catch (error) {
       toast.error("Error al registrar usuario");
       console.error("Error inesperado:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,10 +107,10 @@ const Register = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
-                  Registrarse
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Registrando..." : "Registrarse"}
                 </Button>
-                <p className="text-center text-sm text-gray-600">
+                <p className="text-center text-sm text-muted-foreground">
                   ¿Ya tienes una cuenta?{" "}
                   <Link to="/login" className="text-primary hover:underline">
                     Inicia sesión
