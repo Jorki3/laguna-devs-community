@@ -44,6 +44,9 @@ export const Navbar = () => {
 
   const NavLinks = () => (
     <>
+      <Link to="/" className="text-sm font-medium hover:text-primary">
+        Inicio
+      </Link>
       <Link to="/events" className="text-sm font-medium hover:text-primary">
         Eventos
       </Link>
@@ -53,7 +56,11 @@ export const Navbar = () => {
       {session ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center space-x-2"
+            >
               <User className="w-4 h-4" />
               <span>{profile?.username || "Usuario"}</span>
             </Button>
@@ -72,7 +79,11 @@ export const Navbar = () => {
         </DropdownMenu>
       ) : (
         <Link to="/login">
-          <Button variant="secondary" size="sm" className="flex items-center space-x-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex items-center space-x-2"
+          >
             <Github className="w-4 h-4" />
             <span>Iniciar Sesión</span>
           </Button>
