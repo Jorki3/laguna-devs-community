@@ -1,11 +1,46 @@
-import { useState } from "react";
-import { Menu, X, Github } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Github, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        getProfile(session.user.id);
+      }
+    });
+  }, []);
+
+  const getProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    setProfile(data);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+    setSession(null);
+    setProfile(null);
+  };
 
   const NavLinks = () => (
     <>
@@ -15,12 +50,34 @@ export const Navbar = () => {
       <Link to="/community" className="text-sm font-medium hover:text-primary">
         Comunidad
       </Link>
-      <Link to="/login">
-        <Button variant="secondary" size="sm" className="flex items-center space-x-2">
-          <Github className="w-4 h-4" />
-          <span>Iniciar Sesión</span>
-        </Button>
-      </Link>
+      {session ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+              <User className="w-4 h-4" />
+              <span>{profile?.username || "Usuario"}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+              Dashboard
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/profile")}>
+              Perfil
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
+              Cerrar Sesión
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Link to="/login">
+          <Button variant="secondary" size="sm" className="flex items-center space-x-2">
+            <Github className="w-4 h-4" />
+            <span>Iniciar Sesión</span>
+          </Button>
+        </Link>
+      )}
     </>
   );
 
