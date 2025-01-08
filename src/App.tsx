@@ -1,15 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
-import AdminRoles from "@/pages/AdminRoles";
-import { Toaster } from "@/components/ui/toaster";
-import "./App.css";
+import Events from "@/pages/Events";
+import CreateEvent from "@/pages/CreateEvent";
+import EditEvent from "@/pages/EditEvent";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminEvents from "@/pages/admin/AdminEvents";
+import AdminUsers from "@/pages/admin/AdminUsers";
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
@@ -22,7 +25,13 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/admin/roles" element={<AdminRoles />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/events/new" element={<CreateEvent />} />
+          <Route path="/events/edit/:id" element={<EditEvent />} />
+          <Route path="/admin" element={<AdminDashboard />}>
+            <Route path="events" element={<AdminEvents />} />
+            <Route path="users" element={<AdminUsers />} />
+          </Route>
         </Routes>
         <Toaster />
       </BrowserRouter>
