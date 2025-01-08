@@ -11,7 +11,7 @@ const EventsPage = () => {
       const { data, error } = await supabase
         .from("events")
         .select("*")
-        .neq("status", ["upcoming", "draft"])
+        .not("status", "in", '("upcoming","draft")')
         .order("date", { ascending: false });
 
       if (error) throw error;
