@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { UserRound, Settings2 } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     getProfile();
@@ -29,7 +31,7 @@ const Profile = () => {
         return;
       }
 
-      setUserId(user.id);
+      setUser(user);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -39,6 +41,7 @@ const Profile = () => {
 
       if (error) {
         console.error("Error fetching profile:", error);
+        toast.error("Error al cargar el perfil");
         return;
       }
 
@@ -48,6 +51,7 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Error al cargar el perfil");
     } finally {
       setLoading(false);
     }
@@ -55,7 +59,7 @@ const Profile = () => {
 
   const updateProfile = async () => {
     try {
-      if (!userId) return;
+      if (!user) return;
 
       const { error } = await supabase
         .from("profiles")
@@ -63,7 +67,7 @@ const Profile = () => {
           username,
           avatar_url: avatarUrl,
         })
-        .eq("id", userId);
+        .eq("id", user.id);
 
       if (error) throw error;
       toast.success("Perfil actualizado exitosamente");
@@ -87,16 +91,19 @@ const Profile = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 pt-24">
         <Card className="max-w-2xl mx-auto">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center gap-2">
+            <Settings2 className="h-6 w-6" />
             <CardTitle>Mi Perfil</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex justify-center">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={avatarUrl} alt={username} />
-                <AvatarFallback>{username?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                <AvatarFallback>
+                  <UserRound className="h-12 w-12" />
+                </AvatarFallback>
               </Avatar>
             </div>
 
