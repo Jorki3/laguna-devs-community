@@ -36,7 +36,6 @@ const AdminRoles = () => {
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if current user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -67,22 +66,22 @@ const AdminRoles = () => {
     checkAdminStatus();
   }, [navigate, toast]);
 
-  // Fetch users and their roles
   const { data: users, refetch } = useQuery<Profile[]>({
     queryKey: ["users-roles"],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
           id,
           username,
-          user_roles!inner (
+          user_roles (
             role
           )
-        `);
+        `)
+        .returns<Profile[]>();
 
       if (error) throw error;
-      return profiles as Profile[];
+      return data;
     },
     enabled: isAdmin,
   });

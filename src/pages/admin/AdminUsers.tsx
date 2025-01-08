@@ -34,18 +34,19 @@ const AdminUsers = () => {
   const { data: users, refetch } = useQuery<Profile[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
           id,
           username,
-          user_roles!inner (
+          user_roles (
             role
           )
-        `);
+        `)
+        .returns<Profile[]>();
 
       if (error) throw error;
-      return profiles as Profile[];
+      return data;
     },
   });
 
