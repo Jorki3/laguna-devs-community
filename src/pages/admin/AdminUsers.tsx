@@ -20,10 +20,16 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
+interface Profile {
+  id: string;
+  username: string | null;
+  user_roles: { role: AppRole }[] | null;
+}
+
 const AdminUsers = () => {
   const { toast } = useToast();
 
-  const { data: users, refetch } = useQuery({
+  const { data: users, refetch } = useQuery<Profile[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -77,13 +83,11 @@ const AdminUsers = () => {
             <TableRow key={user.id}>
               <TableCell>{user.username || "Sin nombre"}</TableCell>
               <TableCell>
-                {(user.user_roles?.[0]?.role as AppRole) || "user"}
+                {user.user_roles?.[0]?.role || "user"}
               </TableCell>
               <TableCell>
                 <Select
-                  defaultValue={
-                    (user.user_roles?.[0]?.role as AppRole) || "user"
-                  }
+                  defaultValue={user.user_roles?.[0]?.role || "user"}
                   onValueChange={(value: AppRole) =>
                     handleRoleChange(user.id, value)
                   }

@@ -23,6 +23,12 @@ import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
+interface Profile {
+  id: string;
+  username: string | null;
+  user_roles: { role: AppRole }[] | null;
+}
+
 const AdminRoles = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -60,7 +66,7 @@ const AdminRoles = () => {
   }, [navigate, toast]);
 
   // Fetch users and their roles
-  const { data: users, refetch } = useQuery({
+  const { data: users, refetch } = useQuery<Profile[]>({
     queryKey: ["users-roles"],
     queryFn: async () => {
       const { data: profiles, error } = await supabase
@@ -123,11 +129,11 @@ const AdminRoles = () => {
                 <TableRow key={user.id}>
                   <TableCell>{user.username || "Sin nombre"}</TableCell>
                   <TableCell>
-                    {(user.user_roles?.[0]?.role as AppRole) || "user"}
+                    {user.user_roles?.[0]?.role || "user"}
                   </TableCell>
                   <TableCell>
                     <Select
-                      defaultValue={user.user_roles?.[0]?.role as AppRole || "user"}
+                      defaultValue={user.user_roles?.[0]?.role || "user"}
                       onValueChange={(value: AppRole) => handleRoleChange(user.id, value)}
                     >
                       <SelectTrigger className="w-32">
