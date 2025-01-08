@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -23,7 +23,9 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 interface Profile {
   id: string;
   username: string | null;
-  user_roles: { role: AppRole }[] | null;
+  user_roles: {
+    role: AppRole;
+  }[];
 }
 
 const AdminUsers = () => {
@@ -32,18 +34,18 @@ const AdminUsers = () => {
   const { data: users, refetch } = useQuery<Profile[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: profiles, error } = await supabase
         .from("profiles")
         .select(`
           id,
           username,
-          user_roles (
+          user_roles!inner (
             role
           )
         `);
 
       if (error) throw error;
-      return data;
+      return profiles as Profile[];
     },
   });
 
@@ -82,12 +84,10 @@ const AdminUsers = () => {
           {users?.map((user) => (
             <TableRow key={user.id}>
               <TableCell>{user.username || "Sin nombre"}</TableCell>
-              <TableCell>
-                {user.user_roles?.[0]?.role || "user"}
-              </TableCell>
+              <TableCell>{user.user_roles[0]?.role || "user"}</TableCell>
               <TableCell>
                 <Select
-                  defaultValue={user.user_roles?.[0]?.role || "user"}
+                  defaultValue={user.user_roles[0]?.role || "user"}
                   onValueChange={(value: AppRole) =>
                     handleRoleChange(user.id, value)
                   }

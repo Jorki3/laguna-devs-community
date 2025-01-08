@@ -26,7 +26,9 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 interface Profile {
   id: string;
   username: string | null;
-  user_roles: { role: AppRole }[] | null;
+  user_roles: {
+    role: AppRole;
+  }[];
 }
 
 const AdminRoles = () => {
@@ -74,13 +76,13 @@ const AdminRoles = () => {
         .select(`
           id,
           username,
-          user_roles (
+          user_roles!inner (
             role
           )
         `);
 
       if (error) throw error;
-      return profiles;
+      return profiles as Profile[];
     },
     enabled: isAdmin,
   });
@@ -128,13 +130,13 @@ const AdminRoles = () => {
               {users?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.username || "Sin nombre"}</TableCell>
-                  <TableCell>
-                    {user.user_roles?.[0]?.role || "user"}
-                  </TableCell>
+                  <TableCell>{user.user_roles[0]?.role || "user"}</TableCell>
                   <TableCell>
                     <Select
-                      defaultValue={user.user_roles?.[0]?.role || "user"}
-                      onValueChange={(value: AppRole) => handleRoleChange(user.id, value)}
+                      defaultValue={user.user_roles[0]?.role || "user"}
+                      onValueChange={(value: AppRole) =>
+                        handleRoleChange(user.id, value)
+                      }
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
