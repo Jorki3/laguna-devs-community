@@ -7,6 +7,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import Events from "@/pages/Events";
+import EventDetail from "@/pages/EventDetail";
 import CreateEvent from "@/pages/CreateEvent";
 import EditEvent from "@/pages/EditEvent";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -26,6 +27,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/events/new" element={<CreateEvent />} />
           <Route path="/events/edit/:id" element={<EditEvent />} />
           <Route path="/admin" element={<AdminDashboard />}>

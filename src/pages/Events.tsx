@@ -1,68 +1,59 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navbar } from "@/components/Navbar";
+import { EventCard } from "@/components/EventCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
-import { useToast } from "@/components/ui/use-toast";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { EventsTable } from "@/components/dashboard/EventsTable";
+import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
-const Dashboard = () => {
+const Events = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [session, setSession] = useState(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/login");
-      }
-      setSession(session);
-    });
-  }, [navigate]);
-
-  const { data: events, refetch } = useQuery({
-    queryKey: ["events"],
+  const { data: events, isLoading } = useQuery({
+    queryKey: ["all-events"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
         .select("*")
-        .order("created_at", { ascending: false });
+        .neq("status", "draft")
+        .order("date", { ascending: true });
 
       if (error) throw error;
       return data;
     },
   });
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("events").delete().eq("id", id);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No se pudo eliminar el evento",
-      });
-    } else {
-      toast({
-        title: "Éxito",
-        description: "Evento eliminado correctamente",
-      });
-      refetch();
-    }
-  };
-
   return (
-    <>
+    <div className="min-h-screen">
       <Navbar />
-      <div className="container mx-auto py-32 px-4">
-        <DashboardHeader />
-        <div className="bg-card rounded-lg shadow">
-          <EventsTable events={events} onDelete={handleDelete} />
+      <section className="pt-32 pb-16 px-4">
+        <div className="container mx-auto">
+          <h2 className="font-display text-3xl font-bold mb-8">
+            Todos los Eventos
+          </h2>
+          {isLoading ? (
+            <div className="text-center text-muted-foreground">
+              Cargando eventos...
+            </div>
+          ) : events && events.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  title={event.title}
+                  date={format(new Date(event.date), "dd 'de' MMMM, yyyy")}
+                  location={event.location}
+                  onClick={() => navigate(`/events/${event.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              No hay eventos disponibles en este momento.
+            </div>
+          )}
         </div>
-      </div>
-    </>
+      </section>
+    </div>
   );
 };
 
-export default Dashboard;
+export default Events;
