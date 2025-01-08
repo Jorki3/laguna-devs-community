@@ -19,6 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Database } from "@/integrations/supabase/types";
+
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 const AdminRoles = () => {
   const navigate = useNavigate();
@@ -76,7 +79,7 @@ const AdminRoles = () => {
     enabled: isAdmin,
   });
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  const handleRoleChange = async (userId: string, newRole: AppRole) => {
     const { error } = await supabase
       .from("user_roles")
       .update({ role: newRole })
@@ -120,12 +123,12 @@ const AdminRoles = () => {
                 <TableRow key={user.id}>
                   <TableCell>{user.username || "Sin nombre"}</TableCell>
                   <TableCell>
-                    {user.user_roles?.[0]?.role || "user"}
+                    {(user.user_roles?.[0]?.role as AppRole) || "user"}
                   </TableCell>
                   <TableCell>
                     <Select
-                      defaultValue={user.user_roles?.[0]?.role || "user"}
-                      onValueChange={(value) => handleRoleChange(user.id, value)}
+                      defaultValue={user.user_roles?.[0]?.role as AppRole || "user"}
+                      onValueChange={(value: AppRole) => handleRoleChange(user.id, value)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
